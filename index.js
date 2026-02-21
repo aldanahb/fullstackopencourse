@@ -45,8 +45,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
-app.listen(PORT)
-
 app.get('/api/persons', (request, response) => {
     response.json(persons)
 })
