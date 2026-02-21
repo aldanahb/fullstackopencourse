@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
-let persons = 
+/*let persons = 
 [
     { 
       "id": 1,
@@ -24,7 +26,7 @@ let persons =
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122"
     }
-]
+]*/
 
 const app = express()
 app.use(express.json())
@@ -46,23 +48,28 @@ app.listen(PORT, () => {
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => response.json(persons))
 })
 
 app.get('/info', (request, response) => { 
     const date = new Date().toString()
 
+    Person.countDocuments({}).then(persons => {
+
     response.send(`<div>
-                    <p>Phonebook has info for ${persons.length} people</p>
+                    <p>Phonebook has info for ${persons} people</p>
                     <p>${date}</p>
                 </div>`)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    if(person) response.json(person)
-    else response.status(404).end()
+    const searchId = request.params.id
+    Person.find({_id: searchId}).then(person => {
+        if(person) response.json(person)
+        else response.status(404).end()
+    })
+    
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -83,20 +90,19 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({error: 'incomplete content, missing name or number'})
     }
 
-    const findPerson = persons.find(p => p.name.toLowerCase().trim() === body.name.toLowerCase().trim())
-    if(findPerson) {
-        return response.status(400).json({error: 'name must be unique'})
-    }
+    Person.find({name: body.name.trim()}).then(findPerson => {
+        if(findPerson.length != 0) {
+            response.status(400).json({error: 'name must be unique'})
+        }
+        else {
+            const person = new Person({
+                name: body.name.trim(),
+                number: body.number.trim()
+            })
 
-    const person = {
-        "id": generateId(),
-        "name": body.name.trim(),
-        "number": body.number.trim()
-    }
-
-    persons = persons.concat(person)
-
-    response.json(person)
+            person.save().then(savedPerson => response.json(savedPerson))
+        }
+    })
 
 })
 
