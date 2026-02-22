@@ -81,7 +81,7 @@ const generateId = ()  => {
     return Math.floor(Math.random() * 1000000000)
 }
 
-app.post('/api/persons', (request, response) => { 
+app.post('/api/persons', (request, response, next) => { 
 
     const body = request.body
 
