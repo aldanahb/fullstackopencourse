@@ -85,13 +85,9 @@ app.post('/api/persons', (request, response, next) => {
 
     const body = request.body
 
-    if(!body.name || !body.number) {
-        return response.status(400).json({error: 'incomplete content, missing name or number'})
-    }
-
     Person.find({name: body.name.trim()}).then(findPerson => {
         if(findPerson.length != 0) {
-            response.status(400).json({error: 'name must be unique'})
+            response.status(400).json({error: 'Name must be unique.'})
         }
         else {
             const person = new Person({
@@ -111,7 +107,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: request.body.number
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, {new: true}).then(updatedPerson => {
+    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'}).then(updatedPerson => {
         if(updatedPerson) response.json(updatedPerson)
         else response.status(404).end()
 
