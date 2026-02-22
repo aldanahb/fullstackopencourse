@@ -24,10 +24,10 @@ const Person = mongoose.model('Person', personSchema)
 if(process.argv.length >= 4 && process.argv.length < 5) {
     console.log('provide name and number as arguments')
     process.exit(1)
-} 
-else if(process.argv.length == 3) {
+}
+else if(process.argv.length === 3) {
     console.log("phonebook:")
-    Person.find({}).then(result => { 
+    Person.find({}).then(result => {
         result.forEach(person => {
             console.log(`${person.name} ${person.number}`)
         })
@@ -40,7 +40,7 @@ else {
     number: process.argv[4].trim()
 })
 
-    person.save().then(result => {
+    person.save().then(() => {
     console.log(`added ${person.name} number ${person.number} to phonebook`)
     mongoose.connection.close()
     })

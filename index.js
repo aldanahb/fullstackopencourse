@@ -4,26 +4,26 @@ const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
 
-/*let persons = 
+/*let persons =
 [
-    { 
+    {
       "id": 1,
-      "name": "Arto Hellas", 
+      "name": "Arto Hellas",
       "number": "040-123456"
     },
-    { 
+    {
       "id": 2,
-      "name": "Ada Lovelace", 
+      "name": "Ada Lovelace",
       "number": "39-44-5323523"
     },
-    { 
+    {
       "id": 3,
-      "name": "Dan Abramov", 
+      "name": "Dan Abramov",
       "number": "12-43-234345"
     },
-    { 
+    {
       "id": 4,
-      "name": "Mary Poppendieck", 
+      "name": "Mary Poppendieck",
       "number": "39-23-6423122"
     }
 ]*/
@@ -33,7 +33,7 @@ app.use(express.json())
 app.use(cors())
 app.use(express.static('dist'))
 
-morgan.token('data', (request, response) => {
+morgan.token('data', request => {
     if(request.method === 'POST') {
         return JSON.stringify(request.body)
     }
@@ -51,7 +51,7 @@ app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => response.json(persons))
 })
 
-app.get('/info', (request, response) => { 
+app.get('/info', (request, response) => {
     const date = new Date().toString()
 
     Person.countDocuments({}).then(persons => {
@@ -63,31 +63,31 @@ app.get('/info', (request, response) => {
     })
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     const searchId = request.params.id
-    Person.find({_id: searchId}).then(person => {
+    Person.find( { _id: searchId } ).then(person => {
         if(person) response.json(person[0])
         else response.status(404).end()
     }).catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-    Person.findByIdAndDelete(request.params.id).then(result => {
+    Person.findByIdAndDelete(request.params.id).then(() => {
         response.status(204).end()
     }).catch(error => next(error))
 })
 
-const generateId = ()  => {
+/*const generateId = ()  => {
     return Math.floor(Math.random() * 1000000000)
-}
+}*/
 
-app.post('/api/persons', (request, response, next) => { 
+app.post('/api/persons', (request, response, next) => {
 
     const body = request.body
 
-    Person.find({name: body.name.trim()}).then(findPerson => {
-        if(findPerson.length != 0) {
-            response.status(400).json({error: 'Name must be unique.'})
+    Person.find( { name: body.name.trim() } ).then(findPerson => {
+        if(findPerson.length !== 0) {
+            response.status(400).json( { error: 'Name must be unique.' } )
         }
         else {
             const person = new Person({
@@ -107,12 +107,12 @@ app.put('/api/persons/:id', (request, response, next) => {
         number: request.body.number
     }
 
-    Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'}).then(updatedPerson => {
+    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' }).then(updatedPerson => {
         if(updatedPerson) response.json(updatedPerson)
         else response.status(404).end()
 
     }).catch(error => next(error))
-    
+
 })
 
 const unknownEndpoint = (request, response) => {
